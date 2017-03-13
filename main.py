@@ -74,7 +74,7 @@ class NeuralNetwork():
 		for j in xrange(1,iterations):
 			error=0.0
 			for i in xrange(len(self.dataset[0])):
-				error+= np.absolute(self.feedforward((self.dataset[0][i]).reshape((1,len(self.dataset[0][i].T))))[len(self.layers_output)-1] - self.dataset[1][i])
+				error+= (self.feedforward((self.dataset[0][i]).reshape((1,len(self.dataset[0][i].T))))[len(self.layers_output)-1] - self.dataset[1][i]) ** 2 * 0.5
 				self.backpropagate((self.dataset[0][i]).reshape((1,len(self.dataset[0][i].T))),(self.dataset[1][i]).reshape((1,len(self.dataset[1][i].T))))
 			if (j%10==0):
 				print 'Training iteration %s , error : %s' % (j,error/len(self.dataset[0]))
@@ -84,8 +84,8 @@ class NeuralNetwork():
 		error_rounded= 0.0
 		for i in xrange(len(testing_set[0])):
 			output= self.feedforward(testing_set[0][i])
-			error+= np.absolute(output[len(self.layers_output)-1]-testing_set[1][i]);
-			error_rounded+= np.absolute(round((9*output[len(self.layers_output)-1])-(9*testing_set[1][i]))/9.0);
+			error+= (output[len(self.layers_output)-1]-testing_set[1][i] ) ** 2 * 0.5;
+			error_rounded+= (round((9*output[len(self.layers_output)-1])-(9*testing_set[1][i]))/9.0) ** 2 * 0.5;
 		return error/len(testing_set[0]),error_rounded/len(testing_set[0])
 
 
@@ -210,7 +210,7 @@ def main():
 	network= MnistNeuralNetwork([h1,h2,output],MnistNeuralNetwork.normalize(images,labels))
 
 	print "Training"
-	network.run(1000)
+	network.run(500)
 
 	print "Loading test data"
 	test_images= MnistNeuralNetwork.loadImages('t10k-images-idx3-ubyte',784,testing_set_rows)
@@ -220,8 +220,8 @@ def main():
 	print "Testing"
 	error, error_rounded = network.test(network.normalize(test_images,MnistNeuralNetwork.loadLabels('t10k-labels-idx1-ubyte',testing_set_rows)))	
 	
-	print 'testing set error rate (%): ', error[0]*100
-	print 'testing set error rate with rounding (%): ', error_rounded*100
+	print 'Testing set error rate (%): ', error[0]*100
+	print 'Testing set error rate with rounding (%): ', error_rounded*100
 
 	stop = timeit.default_timer()
 	print "Time: ", stop - start
